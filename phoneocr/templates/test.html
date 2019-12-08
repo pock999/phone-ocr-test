@@ -24,10 +24,25 @@
     <figure>
         <video autoplay id="camera"></video>
     </figure>
-    <input id="take-picture" type="button" disabled="true" value="擷取圖片"></input>
     <canvas id="submit-img" style="display:none;" width="300" height="300"></canvas>
+    <input id="take-picture" type="button" disabled="true" value="擷取圖片"></input>
     
     <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
         
         // Prefer camera resolution nearest to 1080x720.
         var constraints = { video: {width:540,height:360} }; 
@@ -41,12 +56,33 @@
             button.disabled = false;
             button.onclick = function() {
                 canvas.getContext("2d").drawImage(video, 0, 0, 300, 300, 0, 0, 300, 300);
-                var img = canvas.toDataURL("image/jpeg",1.0);
-                alert(img);
+                var img = canvas.toDataURL("image/jpeg", 1.0);
+                fetch("{% url 'resocr' %}", {
+                    method: 'POST',
+                    credentials: "same-origin",
+                    // headers 加入 json 格式
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                        "Accept": "application/json",
+                        'Content-Type': 'application/json'
+                    },
+                    // body 將 json 轉字串送出
+                    body: JSON.stringify({
+                        imgBase64:img
+                    })
+                    }).then((response) => {
+                        alert(response.json());
+                        return response.json(); 
+                    }).then((jsonData) => {
+                        console.log(jsonData);
+                    }).catch((err) => {
+                        console.log('錯誤:', err);
+                    })
             };
             // video.onloadedmetadata = function(e) {
             //     video.play();
             // };
+            
         })
         .catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.
     

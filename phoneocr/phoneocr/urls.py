@@ -15,7 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from ocrtest.views import index, ocr_res
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('',index,name="index"),
+    path('resocr/',ocr_res,name="resocr"),
 ]
