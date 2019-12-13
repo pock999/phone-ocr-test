@@ -3,8 +3,8 @@ from django.http import HttpResponse,JsonResponse
 
 import json
 import cv2
-from ID_OCR import binarizing,depoint,all_OCR
-from StringIO import StringIO
+from ocrtest.ID_OCR import binarizing,depoint,all_OCR
+from io import StringIO
 from PIL import Image
 # Create your views here.
 
